@@ -4,7 +4,7 @@ import { mount, shallow } from 'enzyme';
 import { StoreContext } from 'redux-react-hook';
 import { expectRedux, storeSpy } from 'expect-redux';
 import { configureStore } from '../src/store';
-import { Turtle, AnimatedLine, StaticLines, Drawing, ReduxConnectedDisplay } from '../src/Display';
+import { Turtle, Drawing, ReduxConnectedDisplay } from '../src/Display';
 
 const horizontalLine = { drawCommand: 'drawLine', id: 123, x1: 100, y1: 100, x2: 200, y2: 100 };
 const verticalLine = { drawCommand: 'drawLine', id: 234, x1: 200, y1: 100, x2: 200, y2: 200 };
