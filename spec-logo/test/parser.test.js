@@ -9,7 +9,7 @@ const initialState = { pen, turtle,
   drawCommands: [],
   allFunctions: builtInFunctions,
   collectedParameters: {},
-  parsedInstructions: [],
+  parsedStatements: [],
   parsedTokens: [],
   name: 'Unnamed script'
 };
@@ -314,7 +314,7 @@ describe('parseStatement', () => {
       tokenSpy.mockReturnValue({ isComplete: true });
       let result = parseStatement('; ', {
         allFunctions: [ { names: [';'], parseToken: tokenSpy, perform: () => { } } ],
-        parsedInstructions: [],
+        parsedStatements: [],
         parsedTokens: [{ lineNumber: 123 }]
       });
 

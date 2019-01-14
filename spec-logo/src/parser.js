@@ -28,10 +28,10 @@ function tokenizeLine(line, lastLineNumber) {
 function performAllFinished(state) {
   const updatedState = performAll(
     state,
-    state.parsedInstructions.filter(instruction => !instruction.isPerformed));
+    state.parsedStatements.filter(instruction => !instruction.isPerformed));
   return {
     ...updatedState,
-    parsedInstructions: updatedState.parsedInstructions.map(instruction => ({
+    parsedStatements: updatedState.parsedStatements.map(instruction => ({
       ...instruction, isPerformed: true
     }))
   };

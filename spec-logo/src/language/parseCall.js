@@ -61,7 +61,7 @@ export function parseAndSaveStatement(state, token) {
   if(updatedState.currentInstruction && updatedState.currentInstruction.isComplete) {
     return {
       ...updatedState,
-      parsedInstructions: [ ...updatedState.parsedInstructions, updatedState.currentInstruction ],
+      parsedStatements: [ ...updatedState.parsedStatements, updatedState.currentInstruction ],
       currentInstruction: undefined
     };
   }
