@@ -1,7 +1,7 @@
-import { logoReducer as reducer, defaultState } from '../../src/reducers/logo';
+import { scriptReducer as reducer, defaultState } from '../../src/reducers/script';
 import * as parser from '../../src/parser';
 
-describe('logoReducer', () => {
+describe('scriptReducer', () => {
   it('returns default state when existing state is undefined', () => {
     expect(reducer(undefined, {})).toEqual(defaultState);
   });
