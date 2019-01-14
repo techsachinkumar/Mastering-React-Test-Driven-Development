@@ -6,8 +6,8 @@ import { configureStore } from '../src/store';
 import { MenuButtons } from '../src/MenuButtons';
 
 describe('MenuButtons', () => {
-  let wrapper;
   let store;
+  let wrapper;
 
   beforeEach(() => {
     store = configureStore([storeSpy]);
@@ -45,6 +45,63 @@ describe('MenuButtons', () => {
       expectRedux(store)
         .toDispatchAnAction()
         .matching({ type: 'RESET' });
+    });
+  });
+
+  describe('undo button', () => {
+    it('renders', () => {
+      wrapper = mountWithStore(<MenuButtons />);
+      expect(button('Undo').exists()).toBeTruthy();
+    });
+
+    it('is disabled if there is no history', () => {
+      wrapper = mountWithStore(<MenuButtons />);
+      expect(button('Undo').prop('disabled')).toBeTruthy();
+    });
+
+    it('is enabled if an action occurs', () => {
+      store.dispatch({ type: 'SUBMIT_EDIT_LINE', text: 'forward 10\n' });
+      wrapper = mountWithStore(<MenuButtons />);
+      expect(button('Undo').prop('disabled')).toBeFalsy();
+    });
+
+    it('dispatches an action of UNDO when clicked', () => {
+      store.dispatch({ type: 'SUBMIT_EDIT_LINE', text: 'forward 10\n' });
+      wrapper = mountWithStore(<MenuButtons />);
+      button('Undo').simulate('click');
+      expectRedux(store)
+        .toDispatchAnAction()
+        .matching({ type: 'UNDO' });
+    });
+  });
+
+  describe('redo button', () => {
+    it('renders', () => {
+      wrapper = mountWithStore(<MenuButtons />);
+      expect(button('Redo').exists()).toBeTruthy();
+    });
+
+    it('is disabled if undo has not occurred yet', () => {
+      store.dispatch({ type: 'SUBMIT_EDIT_LINE', text: 'forward 10\n' });
+      wrapper = mountWithStore(<MenuButtons />);
+      expect(button('Redo').prop('disabled')).toBeTruthy();
+    });
+
+    it('is enabled if an undo occurred', () => {
+      store.dispatch({ type: 'SUBMIT_EDIT_LINE', text: 'forward 10\n' });
+      store.dispatch({ type: 'UNDO' });
+      wrapper = mountWithStore(<MenuButtons />);
+      expect(button('Redo').prop('disabled')).toBeFalsy();
+    });
+
+    it('dispatches an action of REDO when clicked', () => {
+      store.dispatch({ type: 'SUBMIT_EDIT_LINE', text: 'forward 10\n' });
+      wrapper = mountWithStore(<MenuButtons />);
+      button('Undo').simulate('click');
+      button('Redo').simulate('click');
+      expectRedux(store)
+        .toDispatchAnAction()
+        .matching({ type: 'REDO' });
     });
   });
 });
