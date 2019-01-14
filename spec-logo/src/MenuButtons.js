@@ -5,12 +5,12 @@ const { useCallback } = React;
 
 export const MenuButtons = () => {
   const mapState = useCallback(({ script }) => ({ script }), []);
-  const { script } = useMappedState(mapState);
+  const { script: { present } } = useMappedState(mapState);
 
   const dispatch = useDispatch();
 
   const reset = useCallback(() => dispatch({ type: 'RESET' }));
-  const canReset = script !== initialState;
+  const canReset = present !== initialState;
 
   return (
     <React.Fragment>

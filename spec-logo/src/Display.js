@@ -33,7 +33,7 @@ export const Drawing = ({ drawCommands, turtle }) => {
 };
 
 export const ReduxConnectedDisplay = () => {
-  const mapState = useCallback(({ script: { drawCommands, turtle } }) => ({ drawCommands, turtle }), []);
+  const mapState = useCallback(({ script: { present: { drawCommands, turtle  } } }) => ({ drawCommands, turtle }), []);
 
   return <Drawing {...useMappedState(mapState)} />;
 };

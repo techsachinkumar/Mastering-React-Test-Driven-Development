@@ -4,7 +4,7 @@ const { useState, useCallback } = React;
 
 export const Prompt = () => {
   const mapState = useCallback(({
-    script: { nextInstructionId } }) => ({ nextInstructionId }), []);
+    script: { present: { nextInstructionId } } }) => ({ nextInstructionId }), []);
 
   const { nextInstructionId } = useMappedState(mapState);
 

@@ -112,11 +112,11 @@ describe('ReduxConnectedDisplay', () => {
   let wrapper;
 
   beforeEach(() => {
-    store = configureStore([storeSpy], { script: {
+    store = configureStore([storeSpy], { script: { present: {
       drawCommands: [
         horizontalLine, verticalLine
       ]
-    }});
+    }}});
   });
 
   function mountWithStore(component) {
