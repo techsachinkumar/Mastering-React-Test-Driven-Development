@@ -101,7 +101,7 @@ describe('Drawing', () => {
     expect(line().length).toEqual(0);
   });
 
-  it('renders a Turtle at the current turtle position', async () => {
+  it('renders a Turtle at the current turtle position', () => {
     wrapper = mount(<Drawing drawCommands={[]} turtle={ { x: 10, y: 20, angle: 30 } } />);
     expect(wrapper.find('Turtle').prop('x')).toEqual(10);
     expect(wrapper.find('Turtle').prop('y')).toEqual(20);
