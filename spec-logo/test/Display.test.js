@@ -62,42 +62,42 @@ describe('Drawing', () => {
   }
 
   it('renders an svg inside div#viewport', () => {
-    wrapper = mount(<Drawing drawCommands={[]} turtle />);
+    wrapper = mount(<Drawing drawCommands={[]} />);
     expect(wrapper.find('div#viewport > svg').exists()).toBeTruthy();
   });
 
   it('sets a viewbox of +/- 300 in either axis and preserves aspect ratio', () => {
-    wrapper = mount(<Drawing drawCommands={[]} turtle />);
+    wrapper = mount(<Drawing drawCommands={[]} />);
     expect(svg().exists()).toBeTruthy();
     expect(svg().prop('viewBox')).toEqual('-300 -300 600 600');
     expect(svg().prop('preserveAspectRatio')).toEqual('xMidYMid slice');
   });
 
   it('renders a line with the line coordinates', () => {
-    wrapper = mount(<Drawing drawCommands={[ horizontalLine ]} turtle />);
+    wrapper = mount(<Drawing drawCommands={[ horizontalLine ]} />);
     expect(line().exists()).toBeTruthy();
     expect(line().containsMatchingElement(
       <line x1={100} y1={100} x2={200} y2={100} />)).toBeTruthy();
   });
 
   it('sets a stroke width of 2', () => {
-    wrapper = mount(<Drawing drawCommands={[ horizontalLine ]} turtle />);
+    wrapper = mount(<Drawing drawCommands={[ horizontalLine ]} />);
     expect(line().prop('strokeWidth')).toEqual('2');
   });
 
   it('sets a stroke color of black', () => {
-    wrapper = mount(<Drawing drawCommands={[ horizontalLine ]} turtle />);
+    wrapper = mount(<Drawing drawCommands={[ horizontalLine ]} />);
     expect(line().prop('stroke')).toEqual('black');
   });
 
   it('draws every drawLine command', () => {
-    wrapper = mount(<Drawing drawCommands={ [ horizontalLine, verticalLine, diagonalLine ] } turtle />);
+    wrapper = mount(<Drawing drawCommands={ [ horizontalLine, verticalLine, diagonalLine ] } />);
     expect(line().length).toEqual(3);
   });
 
   it('does not draw any commands for non-drawLine commands', () => {
     const unknown = { drawCommand: 'unknown' };
-    wrapper = mount(<Drawing drawCommands={[ unknown ]} turtle />);
+    wrapper = mount(<Drawing drawCommands={[ unknown ]} />);
     expect(line().length).toEqual(0);
   });
 
