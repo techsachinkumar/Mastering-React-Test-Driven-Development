@@ -9,6 +9,7 @@ import { AnimatedLine, StaticLines, Turtle, Drawing, ReduxConnectedDisplay } fro
 const horizontalLine = { drawCommand: 'drawLine', id: 123, x1: 100, y1: 100, x2: 200, y2: 100 };
 const verticalLine = { drawCommand: 'drawLine', id: 234, x1: 200, y1: 100, x2: 200, y2: 200 };
 const diagonalLine = { drawCommand: 'drawLine', id: 235, x1: 200, y1: 200, x2: 300, y2: 300 };
+const turtle = { x: 0, y: 0, angle: 0 };
 
 function mountSvg(component) {
   return mount(<svg>{component}</svg>);
@@ -111,6 +112,12 @@ describe('Turtle', () => {
 
 describe('Drawing', () => {
   let wrapper;
+  let requestAnimationFrameSpy;
+
+  beforeEach(() => {
+    requestAnimationFrameSpy = jest.fn();
+    window.requestAnimationFrame = requestAnimationFrameSpy;
+  });
 
   function svg() {
     return wrapper.find('svg');
@@ -118,6 +125,12 @@ describe('Drawing', () => {
 
   function line() {
     return wrapper.find('line');
+  }
+
+  function triggerRequestAnimationFrame(time) {
+    const lastCall = requestAnimationFrameSpy.mock.calls.length - 1;
+    const frameFn = requestAnimationFrameSpy.mock.calls[lastCall][0];
+    frameFn(time);
   }
 
   it('renders an svg inside div#viewport', () => {
@@ -138,11 +151,11 @@ describe('Drawing', () => {
     expect(line().length).toEqual(0);
   });
 
-  it('renders a Turtle at the current turtle position', () => {
-    wrapper = mount(<Drawing drawCommands={[]} turtle={ { x: 10, y: 20, angle: 30 } } />);
-    expect(wrapper.find('Turtle').prop('x')).toEqual(10);
-    expect(wrapper.find('Turtle').prop('y')).toEqual(20);
-    expect(wrapper.find('Turtle').prop('angle')).toEqual(30);
+  it('initially renders a Turtle at the origin', () => {
+    wrapper = mount(<Drawing drawCommands={[]} />);
+    expect(wrapper.find('Turtle').prop('x')).toEqual(0);
+    expect(wrapper.find('Turtle').prop('y')).toEqual(0);
+    expect(wrapper.find('Turtle').prop('angle')).toEqual(0);
   });
 
   it('sends all previous commands to StaticLines', () => {
@@ -150,6 +163,53 @@ describe('Drawing', () => {
     wrapper.setProps({ drawCommands: [ horizontalLine, verticalLine, diagonalLine ] });
     expect(wrapper.find('StaticLines').exists()).toBeTruthy();
     expect(wrapper.find('StaticLines').prop('lineCommands')).toEqual([ horizontalLine, verticalLine ]);
+  });
+
+  it('invokes requestAnimationFrame when the timeout fires', async () => {
+    wrapper = mount(<Drawing drawCommands={[ horizontalLine ]} />);
+    await new Promise(setTimeout);
+    expect(requestAnimationFrameSpy).toHaveBeenCalled();
+  });
+
+  it('renders an AnimatedLine with turtle at the start position when the animation has run for 0s', async () => {
+    wrapper = mount(<Drawing drawCommands={[ horizontalLine ]} />);
+    await new Promise(setTimeout);
+    triggerRequestAnimationFrame(0);
+    wrapper = wrapper.update();
+    expect(wrapper.find('AnimatedLine').exists()).toBeTruthy();
+    expect(wrapper.find('AnimatedLine').prop('commandToAnimate')).toEqual(horizontalLine);
+    expect(wrapper.find('AnimatedLine').prop('turtle')).toEqual({ x: 100, y: 100, angle: 0 });
+  });
+
+  it('renders an AnimatedLine with turtle at a position based on a speed of 5px per ms', async () => {
+    wrapper = mount(<Drawing drawCommands={[ horizontalLine ]} />);
+    await new Promise(setTimeout);
+    triggerRequestAnimationFrame(0);
+    triggerRequestAnimationFrame(250);
+    wrapper = wrapper.update();
+    expect(wrapper.find('AnimatedLine').prop('commandToAnimate')).toEqual(horizontalLine);
+    expect(wrapper.find('AnimatedLine').prop('turtle')).toEqual({ x: 150, y: 100, angle: 0 });
+  });
+
+  it('invokes requestAnimationFrame repeatedly until the duration is reached', async () => {
+    wrapper = mount(<Drawing drawCommands={[ horizontalLine ]} />);
+    await new Promise(setTimeout);
+    triggerRequestAnimationFrame(0);
+    triggerRequestAnimationFrame(250);
+    triggerRequestAnimationFrame(500);
+    expect(requestAnimationFrameSpy.mock.calls.length).toEqual(3);
+  });
+
+  it('moves to the next command once drawing is complete', async () => {
+    wrapper = mount(<Drawing drawCommands={[ horizontalLine, verticalLine ]} />);
+    await new Promise(setTimeout);
+    triggerRequestAnimationFrame(0);
+    triggerRequestAnimationFrame(500);
+    await new Promise(setTimeout);
+    triggerRequestAnimationFrame(0);
+    triggerRequestAnimationFrame(250);
+    wrapper = wrapper.update();
+    expect(wrapper.find('AnimatedLine').prop('turtle')).toEqual({ x: 200, y: 150, angle: 0 });
   });
 });
 
