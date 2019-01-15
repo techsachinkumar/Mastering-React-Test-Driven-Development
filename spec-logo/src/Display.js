@@ -20,6 +20,10 @@ export const StaticLines = ({ lineCommands }) => {
     <line key={id} x1={x1} y1={y1} x2={x2} y2={y2} strokeWidth="2" stroke="black" />);
 };
 
+export const AnimatedLine = ({ commandToAnimate: { x1, y1 }, turtle: { x, y } }) => {
+  return <line x1={x1} y1={y1} x2={x} y2={y} strokeWidth="2" stroke="black" />;
+};
+
 const isDrawLineCommand = command => command.drawCommand === 'drawLine';
 
 export const Drawing = ({ drawCommands, turtle }) => {

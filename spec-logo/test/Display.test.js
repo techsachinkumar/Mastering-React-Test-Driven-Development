@@ -4,7 +4,7 @@ import { mount, shallow } from 'enzyme';
 import { StoreContext } from 'redux-react-hook';
 import { expectRedux, storeSpy } from 'expect-redux';
 import { configureStore } from '../src/store';
-import { StaticLines, Turtle, Drawing, ReduxConnectedDisplay } from '../src/Display';
+import { AnimatedLine, StaticLines, Turtle, Drawing, ReduxConnectedDisplay } from '../src/Display';
 
 const horizontalLine = { drawCommand: 'drawLine', id: 123, x1: 100, y1: 100, x2: 200, y2: 100 };
 const verticalLine = { drawCommand: 'drawLine', id: 234, x1: 200, y1: 100, x2: 200, y2: 200 };
@@ -41,6 +41,37 @@ describe('StaticLines', () => {
   it('draws every drawLine command', () => {
     wrapper = mountSvg(<StaticLines lineCommands={ [ horizontalLine, verticalLine, diagonalLine ] } />);
     expect(line().length).toEqual(3);
+  });
+});
+
+describe('AnimatedLine', () => {
+  let wrapper;
+
+  function line() {
+    return wrapper.find('line');
+  }
+
+  it('draws a line starting at the x1,y1 co-ordinate of the command being drawn', () => {
+    wrapper = mountSvg(<AnimatedLine commandToAnimate={horizontalLine} turtle={turtle} />)
+    expect(line().exists()).toBeTruthy();
+    expect(line().prop('x1')).toEqual(horizontalLine.x1);
+    expect(line().prop('y1')).toEqual(horizontalLine.y1);
+  });
+
+  it('draws a line ending at the current position of the turtle', () => {
+    wrapper = mountSvg(<AnimatedLine commandToAnimate={horizontalLine} turtle={ { x: 10, y: 20 } } />)
+    expect(line().prop('x2')).toEqual(10);
+    expect(line().prop('y2')).toEqual(20);
+  });
+
+  it('sets a stroke width of 2', () => {
+    wrapper = mountSvg(<AnimatedLine commandToAnimate={horizontalLine} turtle={turtle} />)
+    expect(line().prop('strokeWidth')).toEqual('2');
+  });
+
+  it('sets a stroke color of black', () => {
+    wrapper = mountSvg(<AnimatedLine commandToAnimate={horizontalLine} turtle={turtle} />)
+    expect(line().prop('stroke')).toEqual('black');
   });
 });
 
