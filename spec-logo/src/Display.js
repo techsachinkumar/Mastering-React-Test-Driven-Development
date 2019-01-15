@@ -15,17 +15,30 @@ export const Turtle = ({ x, y, angle }) => {
     transform={`rotate(${buildRotation(angle, x, y)})`} />;
 };
 
+export const StaticLines = ({ lineCommands }) => {
+  return lineCommands.map(({ id, x1, y1, x2, y2 }) =>
+    <line key={id} x1={x1} y1={y1} x2={x2} y2={y2} strokeWidth="2" stroke="black" />);
+};
+
 const isDrawLineCommand = command => command.drawCommand === 'drawLine';
 
 export const Drawing = ({ drawCommands, turtle }) => {
 
-  const lineCommands = drawCommands.filter(isDrawLineCommand);
+  const [ previousDrawCommands, setPreviousDrawCommands ] = useState([]);
+  const [ nextCommandToAnimate, setNextCommandToAnimate ] = useState(0);
+
+  if (previousDrawCommands != drawCommands) {
+    setPreviousDrawCommands(drawCommands);
+    setNextCommandToAnimate(previousDrawCommands.length);
+  }
+
+  const lineCommands = drawCommands.slice(0, nextCommandToAnimate)
+    .filter(isDrawLineCommand);
 
   return (
     <div id="viewport">
       <svg viewBox="-300 -300 600 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-        {lineCommands.map(({ id, x1, y1, x2, y2 }) =>
-          <line key={id} x1={x1} y1={y1} x2={x2} y2={y2} strokeWidth="2" stroke="black" />)}
+        <StaticLines lineCommands={lineCommands} />
         <Turtle {...turtle} />
       </svg>
     </div>

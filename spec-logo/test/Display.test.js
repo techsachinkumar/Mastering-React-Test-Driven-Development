@@ -4,7 +4,7 @@ import { mount, shallow } from 'enzyme';
 import { StoreContext } from 'redux-react-hook';
 import { expectRedux, storeSpy } from 'expect-redux';
 import { configureStore } from '../src/store';
-import { Turtle, Drawing, ReduxConnectedDisplay } from '../src/Display';
+import { StaticLines, Turtle, Drawing, ReduxConnectedDisplay } from '../src/Display';
 
 const horizontalLine = { drawCommand: 'drawLine', id: 123, x1: 100, y1: 100, x2: 200, y2: 100 };
 const verticalLine = { drawCommand: 'drawLine', id: 234, x1: 200, y1: 100, x2: 200, y2: 200 };
@@ -13,6 +13,36 @@ const diagonalLine = { drawCommand: 'drawLine', id: 235, x1: 200, y1: 200, x2: 3
 function mountSvg(component) {
   return mount(<svg>{component}</svg>);
 }
+
+describe('StaticLines', () => {
+  let wrapper;
+
+  function line() {
+    return wrapper.find('line');
+  }
+
+  it('renders a line with the line coordinates', () => {
+    wrapper = mountSvg(<StaticLines lineCommands={[ horizontalLine ]} />);
+    expect(line().exists()).toBeTruthy();
+    expect(line().containsMatchingElement(
+      <line x1={100} y1={100} x2={200} y2={100} />)).toBeTruthy();
+  });
+
+  it('sets a stroke width of 2', () => {
+    wrapper = mountSvg(<StaticLines lineCommands={[ horizontalLine ]} />);
+    expect(line().prop('strokeWidth')).toEqual('2');
+  });
+
+  it('sets a stroke color of black', () => {
+    wrapper = mountSvg(<StaticLines lineCommands={[ horizontalLine ]} />);
+    expect(line().prop('stroke')).toEqual('black');
+  });
+
+  it('draws every drawLine command', () => {
+    wrapper = mountSvg(<StaticLines lineCommands={ [ horizontalLine, verticalLine, diagonalLine ] } />);
+    expect(line().length).toEqual(3);
+  });
+});
 
 describe('Turtle', () => {
   let wrapper;
@@ -71,28 +101,6 @@ describe('Drawing', () => {
     expect(svg().prop('preserveAspectRatio')).toEqual('xMidYMid slice');
   });
 
-  it('renders a line with the line coordinates', () => {
-    wrapper = mount(<Drawing drawCommands={[ horizontalLine ]} />);
-    expect(line().exists()).toBeTruthy();
-    expect(line().containsMatchingElement(
-      <line x1={100} y1={100} x2={200} y2={100} />)).toBeTruthy();
-  });
-
-  it('sets a stroke width of 2', () => {
-    wrapper = mount(<Drawing drawCommands={[ horizontalLine ]} />);
-    expect(line().prop('strokeWidth')).toEqual('2');
-  });
-
-  it('sets a stroke color of black', () => {
-    wrapper = mount(<Drawing drawCommands={[ horizontalLine ]} />);
-    expect(line().prop('stroke')).toEqual('black');
-  });
-
-  it('draws every drawLine command', () => {
-    wrapper = mount(<Drawing drawCommands={ [ horizontalLine, verticalLine, diagonalLine ] } />);
-    expect(line().length).toEqual(3);
-  });
-
   it('does not draw any commands for non-drawLine commands', () => {
     const unknown = { drawCommand: 'unknown' };
     wrapper = mount(<Drawing drawCommands={[ unknown ]} />);
@@ -104,6 +112,13 @@ describe('Drawing', () => {
     expect(wrapper.find('Turtle').prop('x')).toEqual(10);
     expect(wrapper.find('Turtle').prop('y')).toEqual(20);
     expect(wrapper.find('Turtle').prop('angle')).toEqual(30);
+  });
+
+  it('sends all previous commands to StaticLines', () => {
+    wrapper = mount(<Drawing drawCommands={[ horizontalLine, verticalLine ]} />);
+    wrapper.setProps({ drawCommands: [ horizontalLine, verticalLine, diagonalLine ] });
+    expect(wrapper.find('StaticLines').exists()).toBeTruthy();
+    expect(wrapper.find('StaticLines').prop('lineCommands')).toEqual([ horizontalLine, verticalLine ]);
   });
 });
 
