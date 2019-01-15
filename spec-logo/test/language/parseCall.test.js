@@ -4,14 +4,24 @@ describe('parseAndSaveStatement', () => {
   let state;
 
   describe('completing an instruction', () => {
+    let parseTokenSpy;
+    let performSpy;
+
     beforeEach(() => {
+      parseTokenSpy = jest.fn();
+      performSpy = jest.fn();
+
+      parseTokenSpy.mockReturnValue({ a: 123 });
+      performSpy.mockReturnValue({ b: 234 });
       state = parseAndSaveStatement({
         parsedStatements: [],
         parsedTokens: [],
         currentInstruction: {
           id: 123,
           isComplete: true,
-          functionDefinition: { parseToken: () => ({ a: 123 }) } } },
+          functionDefinition: {
+            parseToken: parseTokenSpy,
+            perform: performSpy } } },
         { type: 'token', text: 'token' });
     });
 
@@ -27,6 +37,14 @@ describe('parseAndSaveStatement', () => {
     it('adds this token into the parsedTokens after parsing', () => {
       expect(state.parsedTokens.length).toEqual(1);
       expect(state.parsedTokens[0]).toEqual({ type: 'token', text: 'token', instructionId: 123 });
+    });
+
+    it('performs the statement', () => {
+      expect(performSpy).toHaveBeenCalled();
+    });
+
+    it('appends the result from perform', () => {
+      expect(state).toHaveProperty('b', 234);
     });
   });
 
