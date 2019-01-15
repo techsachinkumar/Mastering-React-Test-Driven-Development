@@ -66,4 +66,36 @@ describe('Prompt', () => {
       expect(textArea().prop('value')).toEqual('');
     });
   });
+
+  describe('prompt focus', () => {
+    it('sets focus when component first mounts', () => {
+      wrapper = mountWithStore(<Prompt />);
+      expect(document.activeElement).toEqual(textArea().getDOMNode());
+    });
+
+    function jsdomClearFocus(f) {
+      const node = document.createElement('input');
+      document.body.appendChild(node);
+      node.focus();
+      node.remove();
+    }
+
+    it('calls focus on the underlying DOM element if promptFocusRequest is true', async () => {
+      wrapper = mountWithStore(<Prompt />);
+      await new Promise(setTimeout);
+      jsdomClearFocus();
+      store.dispatch({ type: 'PROMPT_FOCUS_REQUEST' });
+      await new Promise(setTimeout);
+      expect(document.activeElement).toEqual(textArea().getDOMNode());
+    });
+
+    it('dispatches an action notifying that the prompt has focused', async () => {
+      store.dispatch({ type: 'PROMPT_FOCUS_REQUEST' });
+      wrapper = mountWithStore(<Prompt />);
+      await new Promise(setTimeout);
+      return expectRedux(store)
+        .toDispatchAnAction()
+        .matching({ type: 'PROMPT_HAS_FOCUSED' });
+    });
+  });
 });

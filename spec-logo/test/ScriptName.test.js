@@ -62,6 +62,12 @@ describe('ScriptName', () => {
       wrapper = wrapper.update();
       expect(inputField().hasClass('isEditing')).toBeFalsy();
     });
+
+    it('dispatches a prompt focus request', () => {
+      return expectRedux(store)
+        .toDispatchAnAction()
+        .matching({ type: 'PROMPT_FOCUS_REQUEST' });
+    });
   });
 
   describe('when the user moves focus somewhere else', () => {

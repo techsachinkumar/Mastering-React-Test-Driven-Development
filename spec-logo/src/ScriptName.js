@@ -10,15 +10,18 @@ export const ScriptName = () => {
   const { name } = useMappedState(mapState);
   const dispatch = useDispatch();
   const submitScriptName = useCallback(text => dispatch({ type: 'SUBMIT_SCRIPT_NAME', text }), []);
+  const promptFocusRequest = useCallback(text => dispatch({ type: 'PROMPT_FOCUS_REQUEST' }));
 
   const [ updatedScriptName, setScriptName ] = useState(name);
   const [ editingScriptName, setEditingScriptName ] = useState(false);
 
   const toggleEditingScriptName = () => setEditingScriptName(!editingScriptName);
+
   const completeEditingScriptName = () => {
     if (editingScriptName) {
       toggleEditingScriptName();
       submitScriptName(updatedScriptName);
+      promptFocusRequest();
     }
   };
 
