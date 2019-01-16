@@ -25,8 +25,10 @@ export const AnimatedLine = ({ commandToAnimate: { x1, y1 }, turtle: { x, y } })
 };
 
 const isDrawLineCommand = command => command.drawCommand === 'drawLine';
+const isRotateCommand = command => command.drawCommand === 'rotate';
 const distance = ({ x1, y1, x2, y2 }) => Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 const movementSpeed = 5;
+const rotateSpeed = 1000 / 180;
 
 export const Drawing = ({ drawCommands }) => {
 
@@ -44,10 +46,12 @@ export const Drawing = ({ drawCommands }) => {
 
   const commandToAnimate = drawCommands[nextCommandToAnimate];
   const isDrawingLine = commandToAnimate && isDrawLineCommand(commandToAnimate);
+  const isRotating = commandToAnimate && isRotateCommand(commandToAnimate);
 
   useEffect(() => {
     let start;
     let duration;
+
     const handleDrawLineFrame = (time) => {
       if (start === undefined) start = time;
       if (time < start + duration) {
@@ -63,9 +67,32 @@ export const Drawing = ({ drawCommands }) => {
         setNextCommandToAnimate(nextCommandToAnimate + 1);
       }
     };
-    if (commandToAnimate) {
+
+    const handleRotationFrame = (time) => {
+      if (start === undefined) start = time;
+      if (time < start + duration) {
+        const elapsed = time - start;
+        const { previousAngle, newAngle } = commandToAnimate;
+        setTurtle(turtle => ({
+          ...turtle,
+          angle: previousAngle + (newAngle - previousAngle) * (elapsed / duration)
+        }));
+        requestAnimationFrame(handleRotationFrame);
+      } else {
+        setTurtle(turtle => ({
+          ...turtle,
+          angle: commandToAnimate.newAngle
+        }));
+        setNextCommandToAnimate(nextCommandToAnimate + 1);
+      }
+    };
+
+    if (isDrawingLine) {
       duration = movementSpeed * distance(commandToAnimate);
       requestAnimationFrame(handleDrawLineFrame);
+    } else if (isRotating) {
+      duration = rotateSpeed * Math.abs(commandToAnimate.newAngle - turtle.angle);
+      requestAnimationFrame(handleRotationFrame);
     }
   }, [nextCommandToAnimate, drawCommands]);
 

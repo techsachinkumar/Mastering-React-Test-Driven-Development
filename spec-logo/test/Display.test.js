@@ -9,6 +9,7 @@ import { AnimatedLine, StaticLines, Turtle, Drawing, ReduxConnectedDisplay } fro
 const horizontalLine = { drawCommand: 'drawLine', id: 123, x1: 100, y1: 100, x2: 200, y2: 100 };
 const verticalLine = { drawCommand: 'drawLine', id: 234, x1: 200, y1: 100, x2: 200, y2: 200 };
 const diagonalLine = { drawCommand: 'drawLine', id: 235, x1: 200, y1: 200, x2: 300, y2: 300 };
+const rotate90 = { drawCommand: 'rotate', id: 456, previousAngle: 0, newAngle: 90 };
 const turtle = { x: 0, y: 0, angle: 0 };
 
 function mountSvg(component) {
@@ -53,7 +54,7 @@ describe('AnimatedLine', () => {
   }
 
   it('draws a line starting at the x1,y1 co-ordinate of the command being drawn', () => {
-    wrapper = mountSvg(<AnimatedLine commandToAnimate={horizontalLine} turtle={turtle} />)
+    wrapper = mountSvg(<AnimatedLine commandToAnimate={horizontalLine} turtle={ { } } />)
     expect(line().exists()).toBeTruthy();
     expect(line().prop('x1')).toEqual(horizontalLine.x1);
     expect(line().prop('y1')).toEqual(horizontalLine.y1);
@@ -66,12 +67,12 @@ describe('AnimatedLine', () => {
   });
 
   it('sets a stroke width of 2', () => {
-    wrapper = mountSvg(<AnimatedLine commandToAnimate={horizontalLine} turtle={turtle} />)
+    wrapper = mountSvg(<AnimatedLine commandToAnimate={horizontalLine} turtle={ { } } />)
     expect(line().prop('strokeWidth')).toEqual('2');
   });
 
   it('sets a stroke color of black', () => {
-    wrapper = mountSvg(<AnimatedLine commandToAnimate={horizontalLine} turtle={turtle} />)
+    wrapper = mountSvg(<AnimatedLine commandToAnimate={horizontalLine} turtle={ { } } />)
     expect(line().prop('stroke')).toEqual('black');
   });
 });
@@ -210,6 +211,52 @@ describe('Drawing', () => {
     triggerRequestAnimationFrame(250);
     wrapper = wrapper.update();
     expect(wrapper.find('AnimatedLine').prop('turtle')).toEqual({ x: 200, y: 150, angle: 0 });
+  });
+
+  describe('rotation', () => {
+    it('rotates the turtle', async () => {
+      wrapper = mount(<Drawing drawCommands={[ rotate90 ]} />);
+      await new Promise(setTimeout);
+      triggerRequestAnimationFrame(0);
+      triggerRequestAnimationFrame(500);
+      await new Promise(setTimeout);
+      wrapper = wrapper.update();
+      expect(wrapper.find('Turtle').prop('x')).toEqual(0);
+      expect(wrapper.find('Turtle').prop('y')).toEqual(0);
+      expect(wrapper.find('Turtle').prop('angle')).toEqual(90);
+    });
+
+    it('rotates part-way at a speed of 1s per 180 degrees', async () => {
+      wrapper = mount(<Drawing drawCommands={[ rotate90 ]} />);
+      await new Promise(setTimeout);
+      triggerRequestAnimationFrame(0);
+      triggerRequestAnimationFrame(250);
+      wrapper = wrapper.update();
+      expect(wrapper.find('Turtle').prop('x')).toEqual(0);
+      expect(wrapper.find('Turtle').prop('y')).toEqual(0);
+      expect(wrapper.find('Turtle').prop('angle')).toEqual(45);
+    });
+
+    it('invokes requestAnimationFrame repeatedly until the duration is reached', async () => {
+      wrapper = mount(<Drawing drawCommands={[ rotate90 ]} />);
+      await new Promise(setTimeout);
+      triggerRequestAnimationFrame(0);
+      triggerRequestAnimationFrame(250);
+      triggerRequestAnimationFrame(500);
+      expect(requestAnimationFrameSpy.mock.calls.length).toEqual(3);
+    });
+
+    it('moves to the next command once rotation is complete', async () => {
+      wrapper = mount(<Drawing drawCommands={[ rotate90, horizontalLine ]} />);
+      await new Promise(setTimeout);
+      triggerRequestAnimationFrame(0);
+      triggerRequestAnimationFrame(500);
+      await new Promise(setTimeout);
+      triggerRequestAnimationFrame(0);
+      triggerRequestAnimationFrame(250);
+      wrapper = wrapper.update();
+      expect(wrapper.find('AnimatedLine').prop('turtle')).toEqual({ x: 150, y: 100, angle: 90 });
+    });
   });
 });
 
