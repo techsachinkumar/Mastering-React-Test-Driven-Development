@@ -9,8 +9,6 @@ import { Turtle, Drawing, ReduxConnectedDisplay } from '../src/Display';
 const horizontalLine = { drawCommand: 'drawLine', id: 123, x1: 100, y1: 100, x2: 200, y2: 100 };
 const verticalLine = { drawCommand: 'drawLine', id: 234, x1: 200, y1: 100, x2: 200, y2: 200 };
 const diagonalLine = { drawCommand: 'drawLine', id: 235, x1: 200, y1: 200, x2: 300, y2: 300 };
-let rotate90 = { drawCommand: 'rotate', id: 456, angle: 90 };
-const turtle = { x: 0, y: 0, angle: 0 };
 
 function mountSvg(component) {
   return mount(<svg>{component}</svg>);

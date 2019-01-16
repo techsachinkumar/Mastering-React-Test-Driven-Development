@@ -8,7 +8,8 @@ export const rotate = (state, angleValue) => {
     drawCommands: [ ...drawCommands, {
       drawCommand: 'rotate',
       id: nextDrawCommandId++,
-      angle
+      previousAngle: turtle.angle,
+      newAngle: angle
     }],
     turtle: { ...turtle, angle }
   };

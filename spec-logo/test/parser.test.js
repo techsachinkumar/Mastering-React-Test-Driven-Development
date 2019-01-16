@@ -324,7 +324,7 @@ describe('parseTokens', () => {
     ], initialState);
     expect(result.drawCommands).toEqual([
       { drawCommand: 'drawLine', id: 0, x1: 0, y1: 0, x2: 100, y2: 0 },
-      { drawCommand: 'rotate', id: 1, angle: 90 }
+      { drawCommand: 'rotate', id: 1, previousAngle: 0, newAngle: 90 }
     ]);
   });
 });
