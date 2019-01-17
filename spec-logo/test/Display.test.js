@@ -258,6 +258,24 @@ describe('Drawing', () => {
       expect(wrapper.find('AnimatedLine').prop('turtle')).toEqual({ x: 150, y: 100, angle: 90 });
     });
   });
+
+  describe('resetting', () => {
+    it('resets Turtle position and angle to all-zeros', async () => {
+      wrapper = mount(<Drawing drawCommands={[ horizontalLine, rotate90 ]} />);
+      await new Promise(setTimeout);
+      triggerRequestAnimationFrame(0);
+      triggerRequestAnimationFrame(500);
+      await new Promise(setTimeout);
+      triggerRequestAnimationFrame(0);
+      triggerRequestAnimationFrame(500);
+      await new Promise(setTimeout);
+      wrapper.setProps({ drawCommands: [] });
+      wrapper = wrapper.update();
+      expect(wrapper.find('Turtle').prop('x')).toEqual(0);
+      expect(wrapper.find('Turtle').prop('y')).toEqual(0);
+      expect(wrapper.find('Turtle').prop('angle')).toEqual(0);
+    });
+  });
 });
 
 describe('ReduxConnectedDisplay', () => {

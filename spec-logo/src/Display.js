@@ -37,6 +37,9 @@ export const Drawing = ({ drawCommands }) => {
   const [ turtle, setTurtle ] = useState({ x: 0, y: 0, angle: 0 });
 
   if (previousDrawCommands != drawCommands) {
+    if (drawCommands.length === 0) {
+      setTurtle({ x: 0, y: 0, angle: 0 });
+    }
     setPreviousDrawCommands(drawCommands);
     setNextCommandToAnimate(previousDrawCommands.length);
   }
@@ -108,7 +111,7 @@ export const Drawing = ({ drawCommands }) => {
 };
 
 export const ReduxConnectedDisplay = () => {
-  const mapState = useCallback(({ script: { present: { drawCommands, turtle  } } }) => ({ drawCommands, turtle }), []);
+  const mapState = useCallback(({ script: { present: { drawCommands } } }) => ({ drawCommands }), []);
 
   return <Drawing {...useMappedState(mapState)} />;
 };
