@@ -104,4 +104,57 @@ describe('MenuButtons', () => {
         .matching({ type: 'REDO' });
     });
   });
+
+  describe('sharing button', () => {
+    it('renders Start sharing by default', () => {
+      wrapper = mountWithStore(<MenuButtons />);
+      expect(button('Start sharing').exists()).toBeTruthy();
+    });
+
+    it('renders Stop sharing if sharing has started', () => {
+      store.dispatch({ type: 'STARTED_SHARING' });
+      wrapper = mountWithStore(<MenuButtons />);
+      expect(button('Stop sharing').exists()).toBeTruthy();
+    });
+
+    it('renders Start sharing if sharing has stopped', () => {
+      store.dispatch({ type: 'STARTED_SHARING' });
+      store.dispatch({ type: 'STOPPED_SHARING' });
+      wrapper = mountWithStore(<MenuButtons />);
+      expect(button('Start sharing').exists()).toBeTruthy();
+    });
+
+    it('dispatches an action of START_SHARING when start sharing is clicked', () => {
+      wrapper = mountWithStore(<MenuButtons />);
+      button('Start sharing').simulate('click');
+      return expectRedux(store)
+        .toDispatchAnAction()
+        .matching({ type: 'START_SHARING' });
+    });
+
+    it('dispatches an action of STOP_SHARING when stop sharing is clicked', async () => {
+      store.dispatch({ type: 'STARTED_SHARING' });
+      wrapper = mountWithStore(<MenuButtons />);
+      button('Stop sharing').simulate('click');
+      return expectRedux(store)
+        .toDispatchAnAction()
+        .matching({ type: 'STOP_SHARING' });
+    });
+  });
+
+  describe('messages', () => {
+    it('renders a message containing the url if sharing has started', () => {
+      store.dispatch({ type: 'STARTED_SHARING', url: 'http://123' });
+      wrapper = mountWithStore(<MenuButtons />);
+      expect(wrapper.containsMatchingElement(
+        <p>You are now presenting your script. <a href="http://123">Here's the URL for sharing.</a></p>)).toBeTruthy();
+    });
+
+    it('renders a message when watching has started', () => {
+      store.dispatch({ type: 'STARTED_WATCHING' });
+      wrapper = mountWithStore(<MenuButtons />);
+      expect(wrapper.containsMatchingElement(
+        <p>You are now watching the session</p>)).toBeTruthy();
+    });
+  });
 });
