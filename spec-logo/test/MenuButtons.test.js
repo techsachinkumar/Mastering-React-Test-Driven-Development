@@ -106,6 +106,20 @@ describe('MenuButtons', () => {
   });
 
   describe('sharing button', () => {
+    let socketSpyFactory;
+    let socketSpy;
+
+    beforeEach(() => {
+      socketSpyFactory = () => {
+        socketSpy = {
+          close: () => {},
+          send: () => {}
+        };
+        return socketSpy;
+      };
+      window.WebSocket = socketSpyFactory;
+    });
+
     it('renders Start sharing by default', () => {
       wrapper = mountWithStore(<MenuButtons />);
       expect(button('Start sharing').exists()).toBeTruthy();
@@ -132,8 +146,14 @@ describe('MenuButtons', () => {
         .matching({ type: 'START_SHARING' });
     });
 
+    function notifySocketOpened() {
+      socketSpy.onopen();
+      return new Promise(setTimeout);
+    }
+
     it('dispatches an action of STOP_SHARING when stop sharing is clicked', async () => {
       store.dispatch({ type: 'STARTED_SHARING' });
+      await notifySocketOpened();
       wrapper = mountWithStore(<MenuButtons />);
       button('Stop sharing').simulate('click');
       return expectRedux(store)
