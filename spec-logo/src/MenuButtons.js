@@ -30,8 +30,8 @@ export const MenuButtons = () => {
       <button onClick={redo} disabled={!canRedo}>Redo</button>
       <button onClick={reset} disabled={!canReset}>Reset</button>
       {environment.isSharing ?
-        <button onClick={stopSharing}>Stop sharing</button> :
-        <button onClick={startSharing}>Start sharing</button>}
+        <button id="stopSharing" onClick={stopSharing}>Stop sharing</button> :
+        <button id="startSharing" onClick={startSharing}>Start sharing</button>}
     </React.Fragment>
   );
 };
