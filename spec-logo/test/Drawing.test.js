@@ -64,6 +64,9 @@ describe('Drawing', () => {
     });
   };
 
+  const triggerAnimationSequence = times =>
+    times.forEach(triggerRequestAnimationFrame);
+
   it('renders an svg inside div#viewport', () => {
     renderWithStore(<Drawing />, { script: { drawCommands: [] } });
     expect(
@@ -134,8 +137,7 @@ describe('Drawing', () => {
     });
 
     it('renders an AnimatedLine with turtle at a position based on a speed of 5px per ms', () => {
-      triggerRequestAnimationFrame(0);
-      triggerRequestAnimationFrame(250);
+      triggerAnimationSequence([0, 250]);
       expect(
         AnimatedLineModule.AnimatedLine
       ).toHaveBeenLastCalledWith(
@@ -161,9 +163,7 @@ describe('Drawing', () => {
     });
 
     it('invokes requestAnimationFrame repeatedly until the duration is reached', () => {
-      triggerRequestAnimationFrame(0);
-      triggerRequestAnimationFrame(250);
-      triggerRequestAnimationFrame(500);
+      triggerAnimationSequence([0, 250, 500]);
       expect(
         window.requestAnimationFrame.mock.calls.length
       ).toEqual(3);
@@ -171,14 +171,11 @@ describe('Drawing', () => {
   });
 
   describe('after animation', () => {
-    it('animates the next command', async () => {
+    it('animates the next command', () => {
       renderWithStore(<Drawing />, {
         script: { drawCommands: [horizontalLine, verticalLine] }
       });
-      triggerRequestAnimationFrame(0);
-      triggerRequestAnimationFrame(500);
-      triggerRequestAnimationFrame(0);
-      triggerRequestAnimationFrame(250);
+      triggerAnimationSequence([0, 500, 0, 250]);
       expect(
         AnimatedLineModule.AnimatedLine
       ).toHaveBeenLastCalledWith(
@@ -236,8 +233,7 @@ describe('Drawing', () => {
     });
 
     it('rotates the turtle', () => {
-      triggerRequestAnimationFrame(0);
-      triggerRequestAnimationFrame(500);
+      triggerAnimationSequence([0, 500]);
       expect(TurtleModule.Turtle).toHaveBeenLastCalledWith(
         { x: 0, y: 0, angle: 90 },
         expect.anything()
@@ -245,8 +241,7 @@ describe('Drawing', () => {
     });
 
     it('rotates part-way at a speed of 1s per 180 degrees', () => {
-      triggerRequestAnimationFrame(0);
-      triggerRequestAnimationFrame(250);
+      triggerAnimationSequence([0, 250]);
       expect(TurtleModule.Turtle).toHaveBeenLastCalledWith(
         { x: 0, y: 0, angle: 45 },
         expect.anything()
@@ -264,9 +259,7 @@ describe('Drawing', () => {
     });
 
     it('invokes requestAnimationFrame repeatedly until the duration is reached', () => {
-      triggerRequestAnimationFrame(0);
-      triggerRequestAnimationFrame(250);
-      triggerRequestAnimationFrame(500);
+      triggerAnimationSequence([0, 250, 500]);
       expect(
         window.requestAnimationFrame.mock.calls.length
       ).toEqual(3);
@@ -277,10 +270,7 @@ describe('Drawing', () => {
     renderWithStore(<Drawing />, {
       script: { drawCommands: [rotate90, horizontalLine] }
     });
-    triggerRequestAnimationFrame(0);
-    triggerRequestAnimationFrame(500);
-    triggerRequestAnimationFrame(0);
-    triggerRequestAnimationFrame(250);
+    triggerAnimationSequence([0, 500, 0, 250]);
     expect(TurtleModule.Turtle).toHaveBeenLastCalledWith(
       { x: 150, y: 100, angle: 90 },
       expect.anything()
@@ -292,10 +282,7 @@ describe('Drawing', () => {
       renderWithStore(<Drawing />, {
         script: { drawCommands: [horizontalLine, rotate90] }
       });
-      triggerRequestAnimationFrame(0);
-      triggerRequestAnimationFrame(500);
-      triggerRequestAnimationFrame(0);
-      triggerRequestAnimationFrame(500);
+      triggerAnimationSequence([0, 500, 0, 500]);
       renderWithStore(<Drawing />, {
         script: { drawCommands: [] }
       });
