@@ -134,6 +134,11 @@ describe('Drawing', () => {
     frameFn(time);
   }
 
+  function triggerAnimationSequence(times) {
+    times.forEach(triggerRequestAnimationFrame);
+    return new Promise(setTimeout);
+  }
+
   it('renders an svg inside div#viewport', () => {
     wrapper = mount(<Drawing drawCommands={[]} />);
     expect(wrapper.find('div#viewport > svg').exists()).toBeTruthy();
@@ -185,8 +190,7 @@ describe('Drawing', () => {
   it('renders an AnimatedLine with turtle at a position based on a speed of 5px per ms', async () => {
     wrapper = mount(<Drawing drawCommands={[ horizontalLine ]} />);
     await new Promise(setTimeout);
-    triggerRequestAnimationFrame(0);
-    triggerRequestAnimationFrame(250);
+    await triggerAnimationSequence([0, 250]);
     wrapper = wrapper.update();
     expect(wrapper.find('AnimatedLine').prop('commandToAnimate')).toEqual(horizontalLine);
     expect(wrapper.find('AnimatedLine').prop('turtle')).toEqual({ x: 150, y: 100, angle: 0 });
@@ -195,20 +199,15 @@ describe('Drawing', () => {
   it('invokes requestAnimationFrame repeatedly until the duration is reached', async () => {
     wrapper = mount(<Drawing drawCommands={[ horizontalLine ]} />);
     await new Promise(setTimeout);
-    triggerRequestAnimationFrame(0);
-    triggerRequestAnimationFrame(250);
-    triggerRequestAnimationFrame(500);
+    await triggerAnimationSequence([0, 250, 500]);
     expect(requestAnimationFrameSpy.mock.calls.length).toEqual(3);
   });
 
   it('moves to the next command once drawing is complete', async () => {
     wrapper = mount(<Drawing drawCommands={[ horizontalLine, verticalLine ]} />);
     await new Promise(setTimeout);
-    triggerRequestAnimationFrame(0);
-    triggerRequestAnimationFrame(500);
-    await new Promise(setTimeout);
-    triggerRequestAnimationFrame(0);
-    triggerRequestAnimationFrame(250);
+    await triggerAnimationSequence([0, 500]);
+    await triggerAnimationSequence([0, 250]);
     wrapper = wrapper.update();
     expect(wrapper.find('AnimatedLine').prop('turtle')).toEqual({ x: 200, y: 150, angle: 0 });
   });
@@ -217,9 +216,7 @@ describe('Drawing', () => {
     it('rotates the turtle', async () => {
       wrapper = mount(<Drawing drawCommands={[ rotate90 ]} />);
       await new Promise(setTimeout);
-      triggerRequestAnimationFrame(0);
-      triggerRequestAnimationFrame(500);
-      await new Promise(setTimeout);
+      await triggerAnimationSequence([0, 500]);
       wrapper = wrapper.update();
       expect(wrapper.find('Turtle').prop('x')).toEqual(0);
       expect(wrapper.find('Turtle').prop('y')).toEqual(0);
@@ -229,8 +226,7 @@ describe('Drawing', () => {
     it('rotates part-way at a speed of 1s per 180 degrees', async () => {
       wrapper = mount(<Drawing drawCommands={[ rotate90 ]} />);
       await new Promise(setTimeout);
-      triggerRequestAnimationFrame(0);
-      triggerRequestAnimationFrame(250);
+      await triggerAnimationSequence([0, 250]);
       wrapper = wrapper.update();
       expect(wrapper.find('Turtle').prop('x')).toEqual(0);
       expect(wrapper.find('Turtle').prop('y')).toEqual(0);
@@ -240,20 +236,15 @@ describe('Drawing', () => {
     it('invokes requestAnimationFrame repeatedly until the duration is reached', async () => {
       wrapper = mount(<Drawing drawCommands={[ rotate90 ]} />);
       await new Promise(setTimeout);
-      triggerRequestAnimationFrame(0);
-      triggerRequestAnimationFrame(250);
-      triggerRequestAnimationFrame(500);
+      await triggerAnimationSequence([0, 250, 500]);
       expect(requestAnimationFrameSpy.mock.calls.length).toEqual(3);
     });
 
     it('moves to the next command once rotation is complete', async () => {
       wrapper = mount(<Drawing drawCommands={[ rotate90, horizontalLine ]} />);
       await new Promise(setTimeout);
-      triggerRequestAnimationFrame(0);
-      triggerRequestAnimationFrame(500);
-      await new Promise(setTimeout);
-      triggerRequestAnimationFrame(0);
-      triggerRequestAnimationFrame(250);
+      await triggerAnimationSequence([0, 500]);
+      await triggerAnimationSequence([0, 250]);
       wrapper = wrapper.update();
       expect(wrapper.find('AnimatedLine').prop('turtle')).toEqual({ x: 150, y: 100, angle: 90 });
     });
@@ -263,12 +254,8 @@ describe('Drawing', () => {
     it('resets Turtle position and angle to all-zeros', async () => {
       wrapper = mount(<Drawing drawCommands={[ horizontalLine, rotate90 ]} />);
       await new Promise(setTimeout);
-      triggerRequestAnimationFrame(0);
-      triggerRequestAnimationFrame(500);
-      await new Promise(setTimeout);
-      triggerRequestAnimationFrame(0);
-      triggerRequestAnimationFrame(500);
-      await new Promise(setTimeout);
+      await triggerAnimationSequence([0, 500]);
+      await triggerAnimationSequence([0, 500]);
       wrapper.setProps({ drawCommands: [] });
       wrapper = wrapper.update();
       expect(wrapper.find('Turtle').prop('x')).toEqual(0);
