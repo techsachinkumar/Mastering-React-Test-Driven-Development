@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
+import { Dialog } from './Dialog';
 
 const SharingUrl = ({ url }) => (
   <p>
@@ -16,7 +17,10 @@ const mapDispatchToProps = {
   reset: () => ({ type: 'RESET' }),
   undo: () => ({ type: 'UNDO' }),
   redo: () => ({ type: 'REDO' }),
-  startSharing: () => ({ type: 'START_SHARING' }),
+  startSharing: button => ({
+    type: 'START_SHARING',
+    reset: button === 'reset'
+  }),
   stopSharing: () => ({ type: 'STOP_SHARING' })
 };
 
@@ -34,6 +38,13 @@ export const MenuButtons = connect(
     stopSharing
   }) => {
     const canReset = nextInstructionId !== 0;
+
+    const [isSharingDialogOpen, setIsSharingDialogOpen] = useState(
+      false
+    );
+
+    const openSharingDialog = () => setIsSharingDialogOpen(true);
+
     return (
       <React.Fragment>
         {environment.isSharing ? (
@@ -56,10 +67,21 @@ export const MenuButtons = connect(
             Stop sharing
           </button>
         ) : (
-          <button id="startSharing" onClick={startSharing}>
+          <button id="startSharing" onClick={openSharingDialog}>
             Start sharing
           </button>
         )}
+        {isSharingDialogOpen ? (
+          <Dialog
+            onClose={() => setIsSharingDialogOpen(false)}
+            onChoose={startSharing}
+            message="Do you want to share your previous commands, or would you like to reset to a blank script?"
+            buttons={[
+              { id: 'keep', text: 'Share previous' },
+              { id: 'reset', text: 'Reset' }
+            ]}
+          />
+        ) : null}
       </React.Fragment>
     );
   }
